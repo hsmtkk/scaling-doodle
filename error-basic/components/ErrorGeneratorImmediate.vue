@@ -5,7 +5,5 @@ const onThrowErrorClick = (): void => {
 </script>
 
 <template>
-    <section>
-        エラー<button v-on:click="onThrowErrorClick">発生</button>
-    </section>
+    <p>エラーを自動発生</p>
 </template>
