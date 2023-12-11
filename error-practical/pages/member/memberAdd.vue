@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import type {Member} from "@/interfaces";
+import type { Member } from "@/interfaces";
 
 definePageMeta({
 	layout: "member"
 });
 
 const router = useRouter();
-const member: Member =reactive(
+const member: Member = reactive(
 	{
 		id: 0,
 		name: "",
@@ -16,6 +16,7 @@ const member: Member =reactive(
 	}
 );
 const pending = ref(false);
+const noServerError = ref(true)
 const onAdd = async () => {
 	pending.value = true;
 	const asyncData = await useFetch(
@@ -25,8 +26,12 @@ const onAdd = async () => {
 			body: member
 		}
 	);
-	if(asyncData.data.value != null && asyncData.data.value.result == 1) {
-		router.push({name: "member-memberList"});
+	if (asyncData.error.value == null && asyncData.data.value != null && asyncData.data.value.result == 1) {
+		router.push({ name: "member-memberList" });
+	}
+	else {
+		pending.value = false
+		noServerError.value = false
 	}
 };
 </script>
@@ -34,8 +39,12 @@ const onAdd = async () => {
 <template>
 	<nav id="breadcrumbs">
 		<ul>
-			<li><NuxtLink v-bind:to="{name: 'index'}">TOP</NuxtLink></li>
-			<li><NuxtLink v-bind:to="{name: 'member-memberList'}">会員リスト</NuxtLink></li>
+			<li>
+				<NuxtLink v-bind:to="{ name: 'index' }">TOP</NuxtLink>
+			</li>
+			<li>
+				<NuxtLink v-bind:to="{ name: 'member-memberList' }">会員リスト</NuxtLink>
+			</li>
 			<li>会員情報追加</li>
 		</ul>
 	</nav>
@@ -43,8 +52,11 @@ const onAdd = async () => {
 		<h2>会員情報追加</h2>
 		<p v-if="pending">データ送信中…</p>
 		<template v-else>
-			<p>
+			<p v-if="noServerError">
 				情報を入力し、登録ボタンをクリックしてください。
+			</p>
+			<p v-else>
+				サーバー処理中に障害が発生しました。登録をやりなおしてください。
 			</p>
 			<form v-on:submit.prevent="onAdd">
 				<dl>
